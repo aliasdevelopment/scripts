@@ -1,0 +1,47 @@
+#!/usr/bin/expect -f 
+
+puts "DISPLAY: $env(DISPLAY)"
+
+proc function_name { VARIABLE1 VARIABLE2 } {
+  puts "$VARIABLE1"
+  puts "$VARIABLE2"
+  
+  set result [ expr { $VARIABLE1 + $VARIABLE2 } ]
+  
+  if { $result > 5.0 } {
+    puts "$result"
+  } else {
+    puts "Nice"
+  }
+}
+
+function_name 3.3 2.7
+sleep 0.2
+function_name 3.3 1.2
+
+proc multiply { ARRAY } {
+  upvar $ARRAY input
+  array set output {}
+
+  for { set i 0 } { $i < [ array size input ] } { incr i 1 } {
+    set output($i) [ expr { $input($i) * 2.0 } ]
+  }
+  return [ array get output ]
+}
+
+array set numbers {}
+set numbers(0) 3
+set numbers(1) 7
+
+array set numbers_updated [ multiply numbers ] 
+parray numbers_updated
+
+set timeout 10
+spawn date
+expect {
+  -re "\[0-9]+:\[0-9]+"   { set time $expect_out(0,string) }
+  timeout                 { puts "timed out"; exit }
+  eof                     { puts "eof"; exit }
+}
+
+puts "Clock is: $time"
